@@ -12,6 +12,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: fantastic
+      POSTGRES_PORT: 5432
     depends_on:
       db:
         condition: service_healthy
