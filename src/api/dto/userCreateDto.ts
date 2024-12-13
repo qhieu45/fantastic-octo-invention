@@ -1,7 +1,10 @@
 export class UserCreateDto {
-  constructor(public email: string) {}
+  constructor(
+    public email: string,
+    public partnerId: number,
+  ) {}
 
-  static from(email: string) {
-    return new UserCreateDto(email);
+  static from(email: string, partnerId: number) {
+    return new UserCreateDto(email, partnerId);
   }
 }

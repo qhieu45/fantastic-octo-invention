@@ -1,8 +1,8 @@
 -- migrate:up
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    partner_id INTEGER,
+    email VARCHAR(255) NOT NULL,
+    partner_id INTEGER NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE (email, partner_id)

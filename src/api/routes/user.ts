@@ -1,27 +1,34 @@
 import { Router } from 'express';
-import { getUserById, getUsers } from '../../services/userService';
+import { createUser, getUserById, getUsers } from '../../services/userService';
 import { userPostRequest } from '../../schemas/user';
 import { UserCreateDto } from '../dto/UserCreateDto';
-import { ZodError } from 'zod';
+import { validateApiKey } from '../middlewares/validateApiKey';
+import { validateRequest } from '../middlewares/validateRequest';
 
 const route = Router();
 
 export default (app: Router): void => {
   app.use('/users', route);
 
-  route.post('/', (req, res) => {
-    try {
-      const userRequest = userPostRequest.parse(req.body);
-      const userCreateDto = UserCreateDto.from(userRequest.email);
+  route.post(
+    '/',
+    validateApiKey,
+    validateRequest(userPostRequest),
+    async (req, res) => {
+      const request = userPostRequest.parse(req.body); // TODO: improve DRY
 
-      res.send('OK');
-    } catch (e) {
-      if (e instanceof ZodError) {
-        console.log('validation failed', e);
-        res.json({ message: 'Failed validation', errors: e.issues });
+      const partnerId = 1;
+      const userCreateDto = UserCreateDto.from(request.email, partnerId);
+      try {
+        await createUser(userCreateDto);
+      } catch (err) {
+        res.status(500).json({ error: 'Error creating user' });
+        return;
       }
-    }
-  });
+
+      res.status(201).send();
+    },
+  );
 
   route.get('/', async (req, res) => {
     try {
