@@ -3,6 +3,7 @@ import {
   createUser,
   getUserByEmailAndPartnerId,
   getUserById,
+  getUserByPartnerId,
 } from '../../services/userService';
 import { userPostRequest } from '../../schemas/user';
 import { UserCreateDto } from '../dto/UserCreateDto';
@@ -28,6 +29,7 @@ export default (app: Router): void => {
           parsedBody.email,
           partnerId,
         );
+
         if (existingUser) {
           res.status(409).json({ error: 'User already exists' });
           return;
@@ -35,14 +37,25 @@ export default (app: Router): void => {
 
         const userCreateDto = UserCreateDto.from(parsedBody.email, partnerId);
         await createUser(userCreateDto);
+        res.status(201).send();
       } catch (err) {
         res.status(500).json({ error: 'Error creating user' });
         return;
       }
-
-      res.status(201).send();
     },
   );
+
+  route.get('/', validateApiKey, async (req, res) => {
+    try {
+      const partnerId = getPartnerIdFromApiKey(req.headers.authorization ?? '');
+      const users = await getUserByPartnerId(partnerId);
+
+      res.status(200).send(users);
+    } catch (err) {
+      res.status(500).json({ error: 'Error fetching users' });
+      return;
+    }
+  });
 
   route.get('/:id', async (req, res) => {
     const userId = parseInt(req.params.id, 10);
