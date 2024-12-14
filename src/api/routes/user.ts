@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { createUser, getUserById, getUsers } from '../../services/userService';
+import { createUser, getUserById } from '../../services/userService';
 import { userPostRequest } from '../../schemas/user';
 import { UserCreateDto } from '../dto/UserCreateDto';
 import { validateApiKey } from '../middlewares/validateApiKey';
 import { validateRequest } from '../middlewares/validateRequest';
+import { getPartnerIdFromApiKey } from '../../services/partnerAuthService';
 
 const route = Router();
 
@@ -15,11 +16,13 @@ export default (app: Router): void => {
     validateApiKey,
     validateRequest(userPostRequest),
     async (req, res) => {
-      const request = userPostRequest.parse(req.body); // TODO: improve DRY
+      const parsedBody = userPostRequest.parse(req.body);
+      const partnerId = getPartnerIdFromApiKey(req.headers.authorization ?? '');
 
-      const partnerId = 1;
-      const userCreateDto = UserCreateDto.from(request.email, partnerId);
+      const userCreateDto = UserCreateDto.from(parsedBody.email, partnerId);
       try {
+        // check if user exists already and return 409
+
         await createUser(userCreateDto);
       } catch (err) {
         res.status(500).json({ error: 'Error creating user' });
@@ -29,16 +32,6 @@ export default (app: Router): void => {
       res.status(201).send();
     },
   );
-
-  route.get('/', async (req, res) => {
-    try {
-      const users = await getUsers();
-      res.json(users);
-    } catch (error) {
-      console.error('Error in / route: ', error);
-      res.status(500).json({ error: 'Failed to fetch users' });
-    }
-  });
 
   route.get('/:id', async (req, res) => {
     const userId = parseInt(req.params.id, 10);

@@ -17,4 +17,7 @@ export default {
   pgPassword: process.env.POSTGRES_PASSWORD,
   pgDatabase: process.env.POSTGRES_DB,
   pgPort: parseInt(process.env.POSTGRES_PORT ?? '5432', 10),
+
+  // PARTNER API KEYS
+  partnerApiKeys: process.env.PARTNER_API_KEYS ?? '',
 };

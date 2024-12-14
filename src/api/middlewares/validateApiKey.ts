@@ -1,17 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
+import { getPartnerIdFromApiKey } from '../../services/partnerAuthService';
 
 export const validateApiKey = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const auth = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-  const validAuth = auth && auth == 'valid_key';
-
-  if (!validAuth) {
-    res.status(401).json({ error: 'Unauthorized' });
+  if (!authHeader) {
+    res.status(401).json({ error: 'Unauthorized! Invalid api key' });
+    return;
   }
 
-  next();
+  try {
+    getPartnerIdFromApiKey(authHeader);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Unauthorized! Invalid api key' });
+    return;
+  }
 };
