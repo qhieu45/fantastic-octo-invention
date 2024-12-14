@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { createUser, getUserById } from '../../services/userService';
+import {
+  createUser,
+  getUserByEmailAndPartnerId,
+  getUserById,
+} from '../../services/userService';
 import { userPostRequest } from '../../schemas/user';
 import { UserCreateDto } from '../dto/UserCreateDto';
 import { validateApiKey } from '../middlewares/validateApiKey';
@@ -19,10 +23,17 @@ export default (app: Router): void => {
       const parsedBody = userPostRequest.parse(req.body);
       const partnerId = getPartnerIdFromApiKey(req.headers.authorization ?? '');
 
-      const userCreateDto = UserCreateDto.from(parsedBody.email, partnerId);
       try {
-        // check if user exists already and return 409
+        const existingUser = await getUserByEmailAndPartnerId(
+          parsedBody.email,
+          partnerId,
+        );
+        if (existingUser) {
+          res.status(409).json({ error: 'User already exists' });
+          return;
+        }
 
+        const userCreateDto = UserCreateDto.from(parsedBody.email, partnerId);
         await createUser(userCreateDto);
       } catch (err) {
         res.status(500).json({ error: 'Error creating user' });
