@@ -1,61 +1,49 @@
 import { UserCreateDto } from '../api/dto/UserCreateDto';
 import { pool } from '../db';
-import { User } from '../models/User';
+import { User } from '../db/models/User';
+import { UserRepository } from '../db/repository/userRepository';
+
+const userRepository = new UserRepository(pool);
 
 export const getUserByEmailAndPartnerId = async (
   email: string,
   partnerId: number,
 ) => {
-  try {
-    const result = await pool.query(
-      'SELECT * FROM users WHERE email = $1 AND partner_id = $2',
-      [email, partnerId],
+  const result = await userRepository.findByEmailAndPartnerId(email, partnerId);
+  const user = result.rows[0];
+
+  if (user) {
+    const model = new User(
+      user.id,
+      user.email,
+      user.partner_id,
+      new Date(user.created_at),
+      new Date(user.updated_at),
     );
 
-    const user = result.rows[0];
-
-    if (user) {
-      const model = new User(
-        user.id,
-        user.email,
-        user.partner_id,
-        new Date(user.created_at),
-        new Date(user.updated_at),
-      );
-
-      return model;
-    }
-  } catch (err) {
-    console.error('Error fetching user by email & partnerId', err);
-    throw err;
+    return model;
   }
 
   return null;
 };
 
-export const getUserByPartnerId = async (partnerId: number) => {
-  try {
-    const result = await pool.query(
-      'SELECT * FROM users WHERE partner_id = $1',
-      [partnerId],
-    );
+export const getUsersByPartnerId = async (partnerId: number) => {
+  const result = await pool.query('SELECT * FROM users WHERE partner_id = $1', [
+    partnerId,
+  ]);
 
-    const models = result.rows.map(
-      (user) =>
-        new User(
-          user.id,
-          user.email,
-          user.partner_id,
-          new Date(user.created_at),
-          new Date(user.updated_at),
-        ),
-    );
+  const models = result.rows.map(
+    (user) =>
+      new User(
+        user.id,
+        user.email,
+        user.partner_id,
+        new Date(user.created_at),
+        new Date(user.updated_at),
+      ),
+  );
 
-    return models;
-  } catch (err) {
-    console.error('Error fetching users for partnerId', err);
-    throw err;
-  }
+  return models;
 };
 
 export const getUserById = async (id: number) => {
@@ -70,11 +58,7 @@ export const getUserById = async (id: number) => {
 
 export const createUser = async (request: UserCreateDto) => {
   try {
-    const result = await pool.query(
-      'INSERT INTO users (email, partner_id) VALUES($1, $2)',
-      [request.email, request.partnerId],
-    );
-    return result;
+    userRepository.insert(request);
   } catch (err) {
     console.error('Error inserting user', err);
     throw err;
