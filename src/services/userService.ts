@@ -28,10 +28,7 @@ export const getUserByEmailAndPartnerId = async (
 };
 
 export const getUsersByPartnerId = async (partnerId: number) => {
-  const result = await pool.query('SELECT * FROM users WHERE partner_id = $1', [
-    partnerId,
-  ]);
-
+  const result = await userRepository.findByPartnerId(partnerId);
   const models = result.rows.map(
     (user) =>
       new User(
@@ -56,9 +53,9 @@ export const getUserById = async (id: number) => {
   }
 };
 
-export const createUser = async (request: UserCreateDto) => {
+export const createUser = async (userCreateDto: UserCreateDto) => {
   try {
-    userRepository.insert(request);
+    userRepository.insert(userCreateDto);
   } catch (err) {
     console.error('Error inserting user', err);
     throw err;

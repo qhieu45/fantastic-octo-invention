@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import { User } from '../models/User';
 import { UserCreateDto } from '../../api/dto/UserCreateDto';
 
 export type UserRecord = {
@@ -26,21 +25,11 @@ export default class UserRepository {
     }
   }
 
-  async getUsersByPartnerId(partnerId: number): Promise<User[]> {
+  async findByPartnerId(partnerId: number) {
     try {
-      const result = await this.pool.query<UserRecord>(
+      return this.pool.query<UserRecord>(
         'SELECT * FROM users WHERE partner_id = $1',
         [partnerId],
-      );
-      return result.rows.map(
-        (user) =>
-          new User(
-            user.id,
-            user.email,
-            user.partner_id,
-            new Date(user.created_at),
-            new Date(user.updated_at),
-          ),
       );
     } catch (err) {
       console.error('Error fetching users for partnerId', err);

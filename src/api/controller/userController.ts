@@ -23,7 +23,7 @@ export const createNewUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const userCreateDto = UserCreateDto.from(parsedBody.email, partnerId);
+    const userCreateDto = new UserCreateDto(parsedBody.email, partnerId);
     await createUser(userCreateDto);
     res.status(201).send();
   } catch (err) {
