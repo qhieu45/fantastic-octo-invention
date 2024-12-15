@@ -26,7 +26,7 @@ export const createNewUser = async (req: Request, res: Response) => {
     const userCreateDto = new UserCreateDto(parsedBody.email, partnerId);
     await createUser(userCreateDto);
     res.status(201).send();
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Error creating user' });
     return;
   }
@@ -38,7 +38,7 @@ export const getUsers = async (req: Request, res: Response) => {
     const users = await getUsersByPartnerId(partnerId);
 
     res.status(200).send(users);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Error fetching users' });
     return;
   }
