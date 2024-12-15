@@ -1,7 +1,7 @@
 import { UserCreateDto } from '../api/dto/UserCreateDto';
 import { pool } from '../db';
 import { User } from '../db/models/User';
-import { UserRepository } from '../db/repository/userRepository';
+import UserRepository from '../db/repository/UserRepository';
 
 const userRepository = new UserRepository(pool);
 

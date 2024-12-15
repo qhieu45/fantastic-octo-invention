@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { User } from '../models/User';
 import { UserCreateDto } from '../../api/dto/UserCreateDto';
 
-type UserRecord = {
+export type UserRecord = {
   id: number;
   email: string;
   partner_id: number;
@@ -10,7 +10,7 @@ type UserRecord = {
   updated_at: string;
 };
 
-export class UserRepository {
+export default class UserRepository {
   constructor(private pool: Pool) {}
 
   async findByEmailAndPartnerId(email: string, partnerId: number) {
